@@ -44,7 +44,136 @@ import 'videojs-contrib-quality-menu'
 import { onMounted } from 'vue'
 
 const streams = () => useState('streams', () => [])
+const setMediaSession = (player) => {
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: 'Shake TV',
+      artist: 'Mastshake08',
+      album: 'Live Stream',
+      artwork: [
+        {
+          src: 'https://shaketv.jcompsolu.com/default.svg',
+          sizes: '96x96',
+          type: 'image/png'
+        },
+        {
+          src: 'https://shaketv.jcompsolu.com/default.svg',
+          sizes: '128x128',
+          type: 'image/png'
+        }
+      ]
+    })
+  }
 
+
+  navigator.mediaSession.setActionHandler("play", () => {
+    /* Code excerpted. */
+    player.play() // Start playback
+    if (player.paused()) {
+      player.play() // Ensure playback starts if paused
+    }
+    // Update the media session state to playing
+    navigator.mediaSession.playbackState = 'playing'
+  });
+  navigator.mediaSession.setActionHandler("pause", () => {
+    /* Code excerpted. */
+    if (!player.paused()) {
+      player.pause() // Pause playback if it's currently playing
+    }
+    // Update the media session state to paused
+    navigator.mediaSession.playbackState = 'paused'
+  });
+  navigator.mediaSession.setActionHandler("stop", () => {
+    /* Code excerpted. */
+  });
+  navigator.mediaSession.setActionHandler("seekbackward", () => {
+    /* Code excerpted. */
+    const currentTime = player.currentTime() // Get the current playback time
+    const newTime = Math.max(currentTime - 10, 0) // Subtract 10 seconds, ensuring it doesn't go below 0
+    player.currentTime(newTime) // Set the new playback time
+    // Update the media session state to reflect the new time           
+  });
+  navigator.mediaSession.setActionHandler("seekforward", () => {
+    /* Code excerpted. */
+    const currentTime = player.currentTime() // Get the current playback time
+    const duration = player.duration() // Get the total duration of the media
+    const newTime = Math.min(currentTime + 10, duration) // Add 10 seconds, ensuring it doesn't exceed the duration
+    player.currentTime(newTime) // Set the new playback time
+  });
+  navigator.mediaSession.setActionHandler("seekto", () => {
+    /* Code excerpted. */
+  });
+  navigator.mediaSession.setActionHandler("previoustrack", () => {
+    /* Code excerpted. */
+    player.playlist.previous() // Go back to the previous item in the playlist
+    if (player.playlist.currentItem() === null) {
+      // If there are no more items, stop playback
+      player.pause()
+    }
+    const list = player.playlist()
+    const currentItem = list[player.playlist.currentItem()]// Get the current item in the playlist
+
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: currentItem.name || 'Unknown Stream', // Use the name of the current item or a default
+      artist: 'Mastshake08',
+      album: 'Live Stream',
+      artwork: [
+        {
+          src: 'https://shaketv.jcompsolu.com/default.svg',
+          sizes: '96x96',
+          type: 'image/png'
+        },
+        {
+          src: 'https://shaketv.jcompsolu.com/default.svg',
+          sizes: '128x128',
+          type: 'image/png'
+        }
+      ]
+    })
+
+  });
+  navigator.mediaSession.setActionHandler("nexttrack", () => {
+    /* Code excerpted. */
+    player.playlist.next() // Advance to the next item in the playlist
+    if (player.playlist.currentItem() === null) {
+      // If there are no more items, stop playback
+      player.pause()
+    }
+    const list = player.playlist()
+    const currentItem = list[player.playlist.currentItem()]// Get the current item in the playlist
+
+    // Get the current item in the playlist
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: currentItem.name || 'Unknown Stream', // Use the name of the current item or a default
+      artist: 'Mastshake08',
+      album: 'Live Stream',
+      artwork: [
+        {
+          src: 'https://shaketv.jcompsolu.com/default.svg',
+          sizes: '96x96',
+          type: 'image/png'
+        },
+        {
+          src: 'https://shaketv.jcompsolu.com/default.svg',
+          sizes: '128x128',
+          type: 'image/png'
+        }
+      ]
+    })
+  });
+  navigator.mediaSession.setActionHandler("skipad", () => {
+    /* Code excerpted. */
+  });
+  navigator.mediaSession.setActionHandler("togglecamera", () => {
+    /* Code excerpted. */
+  });
+  navigator.mediaSession.setActionHandler("togglemicrophone", () => {
+    /* Code excerpted. */
+  });
+  navigator.mediaSession.setActionHandler("hangup", () => {
+    /* Code excerpted. */
+  });
+}
 onMounted(async () => {
     // Initialize the streams state
   const res = await fetch('https://iptv-org.github.io/api/streams.json')
@@ -102,6 +231,7 @@ onMounted(async () => {
   player.playlist.autoadvance(0) // Disable auto-advance to the next item
   player.playlistUi();
   player.qualityMenu();
+  setMediaSession(player) // Set up the media session for playback controls
   // Dispose of the player when the component is unmounted
   onUnmounted(() => {
     if (player) {
