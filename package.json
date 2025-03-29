@@ -1,0 +1,30 @@
+{
+  "name": "nuxt-app",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev --host",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@nuxt/icon": "^1.11.0",
+    "@nuxt/image": "^1.10.0",
+    "@nuxt/ui": "^3.0.2",
+    "@videojs/themes": "^1.0.1",
+    "nuxt": "^3.16.1",
+    "typescript": "^5.8.2",
+    "videojs": "^1.0.0",
+    "videojs-contrib-quality-menu": "^1.0.3",
+    "videojs-playlist": "^5.2.0",
+    "videojs-playlist-ui": "^5.0.0",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0"
+  },
+  "devDependencies": {
+    "@vite-pwa/nuxt": "^0.10.8",
+    "video.js": "^8.22.0"
+  }
+}
