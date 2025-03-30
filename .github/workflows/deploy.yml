@@ -28,7 +28,7 @@ jobs:
 
       # Step 4: Build the Nuxt application
       - name: Build the application
-        run: npm run generate
+        run: npm run build
 
       # Step 5: Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
