@@ -43,11 +43,6 @@ import 'videojs-playlist/dist/videojs-playlist.js'
 import 'videojs-playlist-ui/dist/videojs-playlist-ui.js'
 import 'videojs-playlist-ui/dist/videojs-playlist-ui.css'
 import 'videojs-contrib-quality-menu'
-import '@silvermine/videojs-airplay'
-import 'videojs-contrib-ads';
-import 'videojs-ima';
-import 'videojs-contrib-ads/dist/videojs-contrib-ads.css'
-import 'videojs-ima/dist/videojs.ima.css'
 import { onMounted } from 'vue'
 useHead({
 script: [
@@ -58,7 +53,9 @@ const player = () => useState('player', () => null)
 const streams = () => useState('streams', () => [])
 const searchQuery = ref('') // Search query state
 
-const filteredStreams = computed(() => {
+
+onMounted(async () => {
+  const filteredStreams = computed(() => {
 // Filter streams based on the search query
 return streams.value.filter((stream) =>
  (stream.channel || stream.url)
@@ -199,7 +196,6 @@ navigator.mediaSession.setActionHandler("nexttrack", () => {
  })
 })
 }
-onMounted(async () => {
  // Initialize the streams state
 const res = await fetch('https://iptv-org.github.io/api/streams.json')
 streams.value = await res.json()
@@ -215,14 +211,6 @@ player.value = videojs('front-player', {
      forward: 10,
      backward: 10
      }
- },
- plugins: {
-     // vjsdownload:{
-     // beforeElement: 'playbackRateMenuButton',
-     // textControl: 'Download video',
-     // name: 'downloadButton',
-     // //downloadURL: 'https://video_url.mp4' //optional if you need a different download url than the source
-     // }
  }
 })
 player.value.playlist({

@@ -4,7 +4,6 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: [
     '@nuxt/ui',
-    //'@vite-pwa/nuxt',
     '@nuxt/scripts',
     '@nuxtjs/google-adsense',
    
