@@ -11,15 +11,19 @@
           >supports HTML5 video</a>.
       </p>
     </video>
-    <div class="vjs-playlist"></div>
     <div class="mt-2">
-      <h2 class="text-lg font-bold">Available Streams</h2>
-      <ul class="list-none p-0 m-0">
-        <li v-for="(stream, index) in streams" :key="index" class="mb-2">
-          <Channel :channel="stream" />
-        </li>
-      </ul>
+        <h2 class="text-lg font-bold">Available Streams</h2>
+        <!-- Search Bar -->
+        <input
+          v-model="searchQuery"
+          type="text"
+          placeholder="Search streams..."
+          class="w-full p-3 mb-4 text-black bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          v-on:keyup="setPlaylist"
+        />
     </div>
+    <div class="vjs-playlist"></div>
+    
      </div>
     </client-only>
 </template>
@@ -41,9 +45,44 @@ import 'videojs-playlist/dist/videojs-playlist.js'
 import 'videojs-playlist-ui/dist/videojs-playlist-ui.js'
 import 'videojs-playlist-ui/dist/videojs-playlist-ui.css'
 import 'videojs-contrib-quality-menu'
+import '@silvermine/videojs-airplay'
+import 'videojs-contrib-ads';
+import 'videojs-ima';
+import 'videojs-contrib-ads/dist/videojs-contrib-ads.css'
+import 'videojs-ima/dist/videojs.ima.css'
 import { onMounted } from 'vue'
-
+useHead({
+  script: [
+    { src: 'https://imasdk.googleapis.com/js/sdkloader/ima3.js' }
+  ]
+})
+const player = () => useState('player', () => null)
 const streams = () => useState('streams', () => [])
+const searchQuery = ref('') // Search query state
+
+const filteredStreams = computed(() => {
+  // Filter streams based on the search query
+  return streams.value.filter((stream) =>
+    (stream.channel || stream.url)
+      .toLowerCase()
+      .includes(searchQuery.value.toLowerCase())
+  )
+  
+})
+const setPlaylist = () => {
+    console.log(filteredStreams.value)
+    player.value.playlist.add(filteredStreams.value.map(stream => ({
+    sources: [
+      {
+        src: stream.url, // Assuming each stream has a 'url' property
+        type: 'application/x-mpegURL'
+      }
+    ],
+    name: stream.channel  ? stream.channel : stream.url, // Assuming each stream has a 'name' property
+    poster: "https://shaketv.jcompsolu.com/default.svg",
+    
+  })),1) 
+}
 const setMediaSession = (player) => {
   if ('mediaSession' in navigator) {
     navigator.mediaSession.metadata = new MediaMetadata({
@@ -160,19 +199,7 @@ const setMediaSession = (player) => {
         }
       ]
     })
-  });
-  navigator.mediaSession.setActionHandler("skipad", () => {
-    /* Code excerpted. */
-  });
-  navigator.mediaSession.setActionHandler("togglecamera", () => {
-    /* Code excerpted. */
-  });
-  navigator.mediaSession.setActionHandler("togglemicrophone", () => {
-    /* Code excerpted. */
-  });
-  navigator.mediaSession.setActionHandler("hangup", () => {
-    /* Code excerpted. */
-  });
+  })
 }
 onMounted(async () => {
     // Initialize the streams state
@@ -181,7 +208,7 @@ onMounted(async () => {
 
   
 //   // Initialize video.js player
-  const player = videojs('front-player', {
+player.value = videojs('front-player', {
     controls: true,
     autoplay: false,
     preload: 'auto',
@@ -190,10 +217,17 @@ onMounted(async () => {
         forward: 10,
         backward: 10
         }
-  }
+    },
+    plugins: {
+        // vjsdownload:{
+        // beforeElement: 'playbackRateMenuButton',
+        // textControl: 'Download video',
+        // name: 'downloadButton',
+        // //downloadURL: 'https://video_url.mp4' //optional if you need a different download url than the source
+        // }
+    }
   })
-   streams.value = streams.value.filter(stream => stream.url && stream.channel) // Filter out streams without URL or name 
-  player.playlist({
+  player.value.playlist({
     sources: [
         {
             src:'https://adultswim-vodlive.cdn.turner.com/live/rick-and-morty/stream.m3u8',
@@ -202,9 +236,9 @@ onMounted(async () => {
     ],
     name: 'Rick and Morty', // Adding a default entry
     poster: "https://shaketv.jcompsolu.com/default.svg",
-    thumbnail: "https://shaketv.jcompsolu.com/default.svg"
+    
   })
-  player.playlist.add({
+  player.value.playlist.add({
     sources: [
         {
             src:'https://adultswim-vodlive.cdn.turner.com/live/rick-and-morty/stream.m3u8',
@@ -213,30 +247,27 @@ onMounted(async () => {
     ],
     name: 'Rick and Morty', // Adding a default entry
     poster: "https://shaketv.jcompsolu.com/default.svg",
-    thumbnail: "https://shaketv.jcompsolu.com/default.svg"
+    
   },0)
 
 //   console.log('Streams initialized:', streams.value)
-  player.playlist.add(streams.value.map(stream => ({
+  streams.value = streams.value.filter(stream => stream.url.startsWith('https://')) // Filter out invalid streams
+  player.value.playlist.add(streams.value.map(stream => ({
     sources: [
       {
         src: stream.url, // Assuming each stream has a 'url' property
         type: 'application/x-mpegURL'
       }
     ],
-    name: stream.channel, // Assuming each stream has a 'name' property
+    name: stream.channel  ? stream.channel : stream.url, // Assuming each stream has a 'name' property
     poster: "https://shaketv.jcompsolu.com/default.svg",
-    thumbnail: "https://shaketv.jcompsolu.com/default.svg"
+    
   })),1)  
-  player.playlist.autoadvance(0) // Disable auto-advance to the next item
-  player.playlistUi();
-  player.qualityMenu();
-  setMediaSession(player) // Set up the media session for playback controls
+  player.value.playlist.autoadvance(0) // Disable auto-advance to the next item
+  player.value.playlistUi();
+  player.value.qualityMenu();
+  setMediaSession(player.value) // Set up the media session for playback controls
   // Dispose of the player when the component is unmounted
-  onUnmounted(() => {
-    if (player) {
-      player.dispose()
-    }
-  })
+  
 })
 </script>

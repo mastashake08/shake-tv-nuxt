@@ -6,7 +6,13 @@ export default defineNuxtConfig({
     '@nuxt/icon',
     '@nuxt/image',
     '@nuxt/ui',
-    '@vite-pwa/nuxt'
+    '@vite-pwa/nuxt',
+    '@nuxt/scripts',
+    '@nuxtjs/google-adsense',
+   
   ],
-  ssr: false
+  ssr: false,
+  app: {
+    baseURL: '/shake-tv-nuxt/'
+  }
 })
