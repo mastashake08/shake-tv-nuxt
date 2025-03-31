@@ -21,6 +21,7 @@
     "tailwindcss": "^3.4.12",
     "typescript": "^5.8.2",
     "videojs": "^1.0.0",
+    "video.js": "^8.22.0",
     "videojs-contrib-quality-menu": "^1.0.3",
     "videojs-ima": "^2.3.0",
     "videojs-playlist": "^5.2.0",
